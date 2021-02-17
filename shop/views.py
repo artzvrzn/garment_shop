@@ -1,5 +1,12 @@
 from django.shortcuts import render, HttpResponse
+from django.views.generic import ListView
+from .models import Item, Category, SubCategory
 
 
-def index(request):
-    return HttpResponse('<h1>Hello world</h1>')
+class IndexView(ListView):
+    model = Item
+    template_name = 'shop/index.html'
+    queryset = Item.objects.filter(available=True).select_related('category', 'subcategory')
+
+
+
