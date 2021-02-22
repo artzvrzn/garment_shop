@@ -4,8 +4,6 @@ from PIL import Image
 from django.db import models
 from django.utils.deconstruct import deconstructible
 from django.core.files.base import ContentFile
-from django.db.models.signals import post_save, pre_save
-from django.dispatch import receiver
 
 
 def image_crop(img, crop_width, crop_height):
@@ -57,10 +55,13 @@ class Item(models.Model):
         super().save(*args, **kwargs)
 
     def thumb_creator(self):
-        img = image_crop(Image.open(self.image), 300, 300)
+        img = Image.open(self.image)
+        # img.thumbnail((400, 400))
+        img_cropped = image_crop(img, min(img.size), min(img.size))
+        img_resized = img_cropped.resize((300, 300))
         # saving image to the memory
         temp_thumb = BytesIO()
-        img.save(temp_thumb, 'JPEG')
+        img_resized.save(temp_thumb, 'JPEG')
         # saving obtained image to the thumbnail ImageField (path, file, save=False).
         # not setting save to False will save image immediately, as a result thumb will be saved before main image
         # uploaded
