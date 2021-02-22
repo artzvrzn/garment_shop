@@ -8,7 +8,7 @@
             <p>stock {{ item.stock }}</p>
             <p>{{ item.category }}</p>
             <p>{{ item.subcategory }}</p>
-            <a href="{% url 'main' %}" class="stretched-link"></a>
+            <a href="{{ item.get_absolute_url }}" class="stretched-link"></a>
         </div>
     </div>
 </div>

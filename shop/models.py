@@ -44,6 +44,9 @@ class Item(models.Model):
     def __str__(self):
         return self.title
 
+    def get_absolute_url(self):
+        return reverse('item', kwargs={'item_pk': self.pk})
+
     def save(self, *args, **kwargs):
         # solution to get db id before saving image, so there wouldn't be None in its name
         if self.pk is None:

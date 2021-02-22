@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card">
+    <h1>{{ item.title }}</h1>
+    <a href="{{ item.category.get_absolute_url }}">{{ item.category }}</a>
+    <img src="{{ item.image.url }}">
+</div>
+{% endblock %}

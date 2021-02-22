@@ -1,5 +1,5 @@
 from django.shortcuts import render, HttpResponse
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 from .models import Item, Category, SubCategory
 
 
@@ -17,3 +17,9 @@ class CategoryView(ListView):
         print(self.kwargs)
         queryset = Item.objects.filter(category_id=self.kwargs['category_id'], available=True)
         return queryset.select_related('category', 'subcategory')
+
+
+class ItemView(DetailView):
+    model = Item
+    pk_url_kwarg = 'item_pk'
+    template_name = 'shop/item.html'
