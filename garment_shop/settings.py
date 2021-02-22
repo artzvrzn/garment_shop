@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'debug_toolbar',
     'shop.apps.ShopConfig',
+    'django_unused_media',
 ]
 
 MIDDLEWARE = [
