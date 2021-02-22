@@ -4,6 +4,8 @@ from PIL import Image
 from django.db import models
 from django.utils.deconstruct import deconstructible
 from django.core.files.base import ContentFile
+from django.db.models.signals import post_save, pre_save
+from django.dispatch import receiver
 
 
 def image_crop(img, crop_width, crop_height):
@@ -18,16 +20,13 @@ def image_crop(img, crop_width, crop_height):
 # deconstructible decorator helps to avoid errors during migrations
 @deconstructible
 class Upload:
-    def __init__(self, name):
+    def __init__(self, name, path):
         self.name = name
+        self.path = path
 
     def __call__(self, instance, filename):
-        try:
-            name, extension = filename.split('.')
-            path_name = os.path.join('images', f'{instance.category}', f'{self.name}_{instance.id}.{extension}')
-        except ValueError:
-            print('Filename for thumbnail is absent, getting name from uploaded image')
-            path_name = os.path.join('images', f'{instance.category}', f'{instance.image.name}')
+        name, extension = filename.split('.')
+        path_name = os.path.join(f'{self.path}', f'{instance.category}', f'{self.name}_{instance.id}.{extension}')
         return path_name
 
 
@@ -38,8 +37,8 @@ class Item(models.Model):
     updated = models.DateTimeField(auto_now=True)
     stock = models.PositiveIntegerField(default=0)
     available = models.BooleanField(default=False)
-    image = models.ImageField(upload_to=Upload('image'), blank=True)
-    thumbnail = models.ImageField(upload_to=Upload('thumbnail'), editable=False)
+    image = models.ImageField(upload_to=Upload('image', path='images'), blank=True)
+    thumbnail = models.ImageField(upload_to=Upload('thumbnail', path='thumbnails'), editable=False)
     category = models.ForeignKey('Category', on_delete=models.CASCADE)
     subcategory = models.ForeignKey('SubCategory', on_delete=models.CASCADE)
 
@@ -47,6 +46,13 @@ class Item(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
+        # solution to get db id before saving image, so there wouldn't be None in its name
+        if self.pk is None:
+            saved_image = self.image
+            self.image = None
+            super().save(*args, **kwargs)
+            self.image = saved_image
+        # here image is getting resized and getting thumbnail
         self.thumb_creator()
         super().save(*args, **kwargs)
 
@@ -58,7 +64,7 @@ class Item(models.Model):
         # saving obtained image to the thumbnail ImageField (path, file, save=False).
         # not setting save to False will save image immediately, as a result thumb will be saved before main image
         # uploaded
-        self.thumbnail.save(self.thumbnail.name, ContentFile(temp_thumb.getvalue()), save=False)
+        self.thumbnail.save(self.image.name, ContentFile(temp_thumb.getvalue()), save=False)
         temp_thumb.close()
 
 
@@ -75,5 +81,21 @@ class SubCategory(models.Model):
 
     def __str__(self):
         return self.title
+
+# UNSAVED = 'unsaved'
+
+
+# @receiver(pre_save, sender=Item)
+# def skip_saving(sender, instance, **kwargs):
+#     if not instance.pk and not hasattr(instance, UNSAVED):
+#         setattr(instance, UNSAVED, instance.image)
+#         instance.image = None
+#
+#
+# @receiver(post_save, sender=Item)
+# def save_file(sender, instance, created, **kwargs):
+#     if created and hasattr(instance, UNSAVED):
+#         instance.image = getattr(instance, UNSAVED)
+#         instance.save()
 
 
