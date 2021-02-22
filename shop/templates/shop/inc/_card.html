@@ -1,0 +1,14 @@
+<div class="col">
+    <div class="card" style="max-width:300px;">
+        <img src="{{ item.thumbnail.url }}" class="card-img-top crop">
+        <div class="card-img-overlay">
+            <p>{{ item.title }}</p>
+            <p>{{ item.desc }}</p>
+            <p>available {{ item.available }}</p>
+            <p>stock {{ item.stock }}</p>
+            <p>{{ item.category }}</p>
+            <p>{{ item.subcategory }}</p>
+            <a href="{% url 'main' %}" class="stretched-link"></a>
+        </div>
+    </div>
+</div>

@@ -3,14 +3,6 @@
 
 {% block content %}
 {% for item in object_list %}
-<div class="card">
-    <p>{{ item.title }}</p>
-    <img src="{{ item.thumbnail.url }}" class="crop">
-    <p>{{ item.desc }}</p>
-    <p>available {{ item.available }}</p>
-    <p>stock {{ item.stock }}</p>
-    <p>{{ item.category }}</p>
-    <p>{{ item.subcategory }}</p>
-</div>
+{% include 'shop/inc/_card.html' %}
 {% endfor %}
 {% endblock %}

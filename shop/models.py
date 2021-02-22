@@ -2,6 +2,7 @@ import os
 from io import BytesIO
 from PIL import Image
 from django.db import models
+from django.urls import reverse
 from django.utils.deconstruct import deconstructible
 from django.core.files.base import ContentFile
 
@@ -78,6 +79,9 @@ class Category(models.Model):
 
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return reverse('category_tab', kwargs={'category_id': self.pk})
 
 
 class SubCategory(models.Model):
