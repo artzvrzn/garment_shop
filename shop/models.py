@@ -56,12 +56,16 @@ class Item(models.Model):
 
     def thumb_creator(self):
         img = Image.open(self.image)
-        # img.thumbnail((400, 400))
+        file_path, file_ext = os.path.splitext(self.image.name)
         img_cropped = image_crop(img, min(img.size), min(img.size))
         img_resized = img_cropped.resize((300, 300))
         # saving image to the memory
         temp_thumb = BytesIO()
-        img_resized.save(temp_thumb, 'JPEG')
+        if file_ext == '.jpg':
+            file_ext = 'JPEG'
+        else:
+            file_ext = file_ext[1:]
+        img_resized.save(temp_thumb, file_ext)
         # saving obtained image to the thumbnail ImageField (path, file, save=False).
         # not setting save to False will save image immediately, as a result thumb will be saved before main image
         # uploaded
